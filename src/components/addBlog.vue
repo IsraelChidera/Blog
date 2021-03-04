@@ -3,7 +3,10 @@
        <h2>Add a New Blog Post</h2>
        <form v-if="!submitted">
            <label>Blog Title:</label>
-           <input type="text" v-model.lazy="blog.title" class="blog-title">
+           <input type="text" 
+           v-model.lazy="blog.title" 
+           class="blog-title"
+           >
 
            <label>Blog Content:</label>
            <textarea name="content" id="" cols="30" rows="10" v-model.lazy="blog.content">
@@ -53,6 +56,8 @@
 </template>
 
 <script>
+import {db} from '../firebaseConfig'
+
 export default {
    data() {
        return {
@@ -68,15 +73,17 @@ export default {
    },
    methods: {
        post: function(){
-           this.$http.post('https://jsonplaceholder.typicode.com/posts',{
-               title: this.blog.title,
-               body: this.blog.content,
-               userId: 1
-           }).then(function(data){
-               console.log(data);
-               this.submitted = true;
-           })
+            db.collection("blogspot").add(
+            this.blog
+        )
+        .then((docRef) => {
+            console.log("Document written with ID: ", docRef.id);
+        })
+        .catch((error) => {
+            console.error("Error adding document: ", error);
+        });
        }
+       
    }
 }
 </script>

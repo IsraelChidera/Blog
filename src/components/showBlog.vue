@@ -3,20 +3,25 @@
         <h1>All Blog Articles</h1>
         <input type="text" v-model="search" placeholder="Search Blog">
         <div v-for="(blog, i) in filteredBlogs" v-bind:key="i" class="blogList">
-           <router-link v-bind:to="'/blog/'+ blog.id"><h2 v-rainbow>{{blog.title | toUpperCase}}</h2></router-link> 
-            <article>{{blog.body| slice}}</article>
+           <router-link v-bind:to="'/blog/'+ id[i]">
+                <h2 v-rainbow>{{blog.title }}</h2>
+            </router-link> 
+            <article>{{blog.content}}</article>
+            {{id[i]}}
         </div>
     </div>
 </template>
 
 <script>
 import searchMixins from '../mixins/searchmxins'
+import {db} from '../firebaseConfig'
 
 export default {
     data() {
         return {
             blogs: [],
-            search: ''
+            search: '',
+            id: []
         }
     },
     methods: {
@@ -26,12 +31,12 @@ export default {
         
     },
     filters: {
-        toUpperCase(val){
-            return val.toUpperCase();
-        }, 
-        slice(val){
-            return val.slice(0,100) + " . . .";
-        }
+        // toUpperCase(val){
+        //     return val.toUpperCase();
+        // }, 
+        // slice(val){
+        //     return val.slice(0,100) + " . . .";
+        // }
     },
     directives: {
         'rainbow': {
@@ -42,10 +47,17 @@ export default {
     },
     mixins: [searchMixins],
     created(){
-        this.$http.get("https://jsonplaceholder.typicode.com/posts/")
-    .then((res) => {
-      this.blogs = res.body.slice(0,10)
-    });
+       db.collection("blogspot").get().then((querySnapshot) => {
+            querySnapshot.forEach((doc) => {
+                
+                
+                this.id.push(doc.id);
+               return this.blogs.push(doc.data());
+                // console.log(`${doc.id} => ${doc.data()}`);
+                // console.log(doc.data().content)
+                // this.blogs = doc.data().content
+            });
+        });
     }
 }
 </script>
